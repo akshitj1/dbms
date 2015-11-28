@@ -124,3 +124,6 @@ from reviews as t1,
 (select prodId, count(*) as review_cnt from reviews group by prodId order by review_cnt DESC  limit 100) as t2
 where t1.prodId=t2.prodId
 );
+
+#check if query assigned correct ranks
+select * from rwRank where prodId='B0002L5R78' order by rank asc limit 10;
