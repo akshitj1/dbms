@@ -127,3 +127,47 @@ where t1.prodId=t2.prodId
 
 #check if query assigned correct ranks
 select * from rwRank where prodId='B0002L5R78' order by rank asc limit 10;
+
+#get categories of reviewer
+SET @rId='A6FIAB28IS79 ';
+select t1.prodId, t1.rank, t2.catagories
+from (select prodId, rank from rwRank where reviewerId=@rId) as t1,
+metadata as t2
+where t2.asin=t1.prodId;
+
+#get counts of reviews written
+select reviewerId, count(*) as cnt
+from rwRank
+group by reviewerId
+order by cnt desc
+limit 10;
+
+SET @rId='A6FIAB28IS79', @pId='B000E6G9RI';
+select ohelp, phelp, unixReviewTime
+from reviews
+where reviewerId=@rId and prodId=@pId;
+
+DROP TABLE IF EXISTS `fTbl`;
+CREATE TABLE `fTbl` (
+  `reviewerId` varchar(255) DEFAULT NULL,
+  `prodId` varchar(255) DEFAULT NULL,
+  `uVotes` int(11) DEFAULT 0,
+  `dVotes` int(11) DEFAULT 0,
+  `reviewText` text,
+  `hScore` FLOAT(8,5) DEFAULT 0,
+  `cScore` FLOAT(8,5) DEFAULT 0,
+  `fScore` FLOAT(8,5) DEFAULT 0,
+  `noReviews` int(11) DEFAULT 0,
+  PRIMARY KEY (reviewerId, prodId)
+);
+create index fScore_idx on fTbl(fscore);
+
+SET @pId = 'B0002L5R78';
+select reviewerId from rwRank where prodId = @pId limit 10;
+
+set @rId='A6FIAB28IS79', @pId = 'B0002L5R78';
+insert ignore into fTbl(reviewerId, prodId) values (@rId, @pId);
+
+update fTbl
+set uVotes=%s, dVotes=%s, reviewText=%s, hScore=%s, cScore=%s, fScore=%s, noReviews=%s
+where reviewerId=%s, prodId=%s;

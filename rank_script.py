@@ -5,14 +5,13 @@ from warnings import resetwarnings
 conn = sql.connect(host="localhost", port=3306, user="root", passwd="", db="review_db")
 csr = conn.cursor()
 
-#filterwarnings('ignore', category = db.Warning)
+filterwarnings('ignore', category = conn.Warning)
 qry="select prodId, count(*) as review_cnt from reviews group by prodId order by review_cnt DESC  limit 100"
 csr.execute(qry)
 res=csr.fetchall()
 for row in res:
 	pid=row[0]
 	print(pid)
-	pid='B000LRMS66'
 
 	qry="SET @i=0, @pId=%s;"
 	try:
@@ -59,7 +58,7 @@ for row in res:
 		print("error ", e)
 		break
 	conn.commit()
-	break
+	# break
 csr.close()
 conn.close()
 resetwarnings()
