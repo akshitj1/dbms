@@ -2,16 +2,17 @@ import MySQLdb as sql
 from warnings import filterwarnings
 from warnings import resetwarnings
 
-db = sql.connect(host="localhost", port=3306, user="root", passwd="", db="review_db")
-csr = db.cursor()
+conn = sql.connect(host="localhost", port=3306, user="root", passwd="", db="review_db")
+csr = conn.cursor()
 
-filterwarnings('ignore', category = db.Warning)
+#filterwarnings('ignore', category = db.Warning)
 qry="select prodId, count(*) as review_cnt from reviews group by prodId order by review_cnt DESC  limit 100"
 csr.execute(qry)
 res=csr.fetchall()
 for row in res:
 	pid=row[0]
 	print(pid)
+	pid='B000LRMS66'
 
 	qry="SET @i=0, @pId=%s;"
 	try:
@@ -45,6 +46,10 @@ for row in res:
 		print("error ", e)
 		break
 
+	# qry="select * from rTbl limit 10;"
+	# csr.execute(qry)
+	# res=csr.fetchall()
+	# print(res)
 	qry="""update rwRank t1, rTbl t2
 	set t1.rank=t2.relRank
 	where t1.prodId=@pId and t1.reviewerId=t2.reviewerId;"""
@@ -53,5 +58,8 @@ for row in res:
 	except sql.Error as e:
 		print("error ", e)
 		break
+	conn.commit()
 	break
+csr.close()
+conn.close()
 resetwarnings()
